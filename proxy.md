@@ -10,3 +10,26 @@ HTTPS_PROXY="http://127.0.0.1:7890"
 ALL_PROXY="socks5h://127.0.0.1:7890"
 NO_PROXY="localhost,127.0.0.1,::1"
 关键点：NO_PROXY 里必须包含 127.0.0.1。这能确保 Codex 访问本机的 CC Switch 服务时，不会把这个请求也傻傻地丢给 VPN 代理，从而避免本地回环冲突。
+
+
+在VPN里用脚本：
+const main = (config) => {
+  if (!config || !Array.isArray(config.rules)) {
+    throw new Error("配置中没有 rules 数组；此脚本需要 Clash/Mihomo 格式");
+  }
+
+  const localRules = [
+    "IP-CIDR,127.0.0.1/32,DIRECT,no-resolve",
+    "IP-CIDR6,::1/128,DIRECT,no-resolve",
+    "DOMAIN,localhost,DIRECT",
+  ];
+
+  config.rules = [
+    ...localRules,
+    ...config.rules.filter((rule) => !localRules.includes(rule)),
+  ];
+
+  return config;
+};
+
+
